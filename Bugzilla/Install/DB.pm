@@ -840,7 +840,7 @@ sub _update_flagtypes_id {
     }
   }
 
-  if ($flagtypes_def->{TYPE} eq 'SMALLSERIAL') {
+  if ($flagtypes_def->{TYPE} ne 'MEDIUMSERIAL') {
     $flagtypes_def->{TYPE} = 'MEDIUMSERIAL';
     $dbh->bz_alter_column('flagtypes', 'id', $flagtypes_def);
   }
@@ -896,7 +896,7 @@ sub _populate_longdescs {
       my $buffer = "";
       foreach my $line (split(/\n/, $desc)) {
         $line =~ s/\s+$//g;    # Trim trailing whitespace.
-        if ($line =~ /^------- Additional Comments From ([^\s]+)\s+(\d.+\d)\s+-------$/)
+        if ($line =~ /^------- Additional Comments From ([^\s]+)\s+((?a:\d.+\d))\s+-------$/)
         {
           my $name = $1;
           my $date = str2time($2);
@@ -1149,7 +1149,7 @@ sub _populate_milestones_table {
 
       # check if the value already exists
       my $sortkey = substr($value, 1);
-      if ($sortkey !~ /^\d+$/) {
+      if ($sortkey !~ /^\d+$/a) {
         $sortkey = 0;
       }
       else {
@@ -1250,7 +1250,7 @@ sub _populate_duplicates_table {
 
     foreach $key (keys(%dupes)) {
       $dupes{$key}
-        =~ /^.*\*\*\* This bug has been marked as a duplicate of (\d+) \*\*\*$/ms;
+        =~ /^.*\*\*\* This bug has been marked as a duplicate of (\d+) \*\*\*$/ams;
       $dupes{$key} = $1;
       $dbh->do("INSERT INTO duplicates VALUES(?, ?)", undef, $dupes{$key}, $key);
 
@@ -2303,7 +2303,7 @@ sub _copy_old_charts_into_database {
 
       my @lines = <$in>;
       while (my $line = shift @lines) {
-        if ($line =~ /^(\d+\|.*)/) {
+        if ($line =~ /^(\d+\|.*)/a) {
           my @numbers = split(/\||\r/, $1);
 
           # Only take the first line for each date; it was possible to
@@ -3583,7 +3583,7 @@ sub _fix_illegal_flag_modification_dates {
 
   # If no rows are affected, $dbh->do returns 0E0 instead of 0.
   print "$rows flags had an illegal modification date. Fixed!\n"
-    if ($rows =~ /^\d+$/);
+    if ($rows =~ /^\d+$/a);
 }
 
 sub _add_visiblity_value_to_value_tables {
@@ -3682,7 +3682,7 @@ sub _set_attachment_comment_type {
   foreach my $id (@comment_ids) {
     $count++;
     my $text = $comments{$id};
-    next if $text !~ /^\Q$string\E(\d+)/;
+    next if $text !~ /^\Q$string\E(\d+)/a;
     my $attachment_id = $1;
     my @lines         = split("\n", $text);
     if ($type == CMT_ATTACHMENT_CREATED) {

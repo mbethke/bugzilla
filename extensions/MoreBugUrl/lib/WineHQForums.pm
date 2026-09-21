@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Extension::MoreBugUrl::PHP;
+package Bugzilla::Extension::MoreBugUrl::WineHQForums;
 
 use 5.14.0;
 use strict;
@@ -20,11 +20,12 @@ use base qw(Bugzilla::BugUrl);
 sub should_handle {
   my ($class, $uri) = @_;
 
-  # PHP Bug URLs have only one form:
-  #   https://bugs.php.net/bug.php?id=1234
-  return (lc($uri->authority) eq 'bugs.php.net'
-      and $uri->path =~ m|/bug\.php$|
-      and $uri->query_param('id') =~ /^\d+$/a) ? 1 : 0;
+  # WineHQ Forums URLs only have one form:
+  #   http(s)://forum.winehq.org/viewtopic.php?f=1234&t=1234
+  return (lc($uri->authority) eq 'forum.winehq.org'
+    and $uri->path =~ m|^/viewtopic\.php$|
+    and $uri->query_param('f') =~ /^\d+$/a
+    and $uri->query_param('t') =~ /^\d+$/a) ? 1 : 0;
 }
 
 sub _check_value {
@@ -32,10 +33,11 @@ sub _check_value {
 
   my $uri = $class->SUPER::_check_value(@_);
 
-  # PHP Bug URLs redirect to HTTPS, so just use the HTTPS scheme.
+  # WineHQ Forums HTTP URLs redirect to HTTPS, so just use the HTTPS
+  # scheme.
   $uri->scheme('https');
 
-  # And remove any # part if there is one.
+  # Remove any # part if there is one.
   $uri->fragment(undef);
 
   return $uri;
