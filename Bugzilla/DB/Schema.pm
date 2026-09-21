@@ -886,7 +886,6 @@ use constant ABSTRACT_SCHEMA => {
 
   status_workflow => {
     FIELDS => [
-
       id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       # On bug creation, there is no old value.
       old_status => {
